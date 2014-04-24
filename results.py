@@ -64,6 +64,9 @@ def parse_single_result(fileName):
     #print("threads:" + str(numThreads) + " affinity:" + str(affinity) + " queue:" + str(queue))
 
 def generate_figures():
+    """
+    generate figures for all benchmarks
+    """
     # create results directory if necessary
     try:
         makedirs("results")
@@ -78,7 +81,8 @@ def generate_figures():
 def generate_figure(benchmark, name):
     
     numThreads = {}
-    runTimes = {}
+    runtimes = {}
+    speedups = {}
     
     for a in affinities:
         
@@ -94,20 +98,23 @@ def generate_figure(benchmark, name):
             numThreadsTmp.append(k)
             runTimesTmp.append(avg)
             
-            runTimes[a] = runTimesTmp
+            runtimes[a] = runTimesTmp
             numThreads[a] = numThreadsTmp
+  
+    if runtimes == {}:
+        return  # if there were no values, skip
   
     # some matplotlib magic
     fig, ax = plt.subplots()
     
     ax.set_title(name + " - Runtime")    
-    ax.axis([0.0, max(numThreads["scatter"])+1, 0.0, max(runTimes["scatter"])*1.1])
+    ax.axis([0.0, max(numThreads["scatter"])+1, 0.0, max(runtimes["scatter"])*1.1])
 
     markers = {"scatter" : "^", "compact" : "o"}
     colors = {"scatter" : "b", "compact" : "r"}
 
     for a in affinities:
-        ax.plot(numThreads[a], runTimes[a], color=colors[a], marker=markers[a], label=a)
+        ax.plot(numThreads[a], runtimes[a], color=colors[a], marker=markers[a], label=a)
 
     ax.set_xlabel('numThreads')
     ax.set_ylabel('runtime [s]')
