@@ -75,18 +75,18 @@ def generate_figures():
             raise
     
     for b in benchmarks:
-        print("plot " + b)
         generate_figure(model[b], b)
 
 def generate_figure(benchmark, name):
-    AVG, NTH, SPU = "avg", "threads", "speedup"
+    AVG, NTH, SPU, EFF = "avg", "threads", "speedup", "efficiency"
     
     results = {}
     for a in affinities:
         results[a] = {}
         results[a][NTH] = []
         results[a][AVG] = []
-        results[a][SPU] =[]
+        results[a][SPU] = []
+        results[a][EFF] = []
     
     for a in affinities:
         for k in sorted(benchmark[a].keys()):
@@ -98,6 +98,11 @@ def generate_figure(benchmark, name):
             avg = sum(x for x in v) / len(v)
             results[a][NTH].append(k)
             results[a][AVG].append(avg)
+            results[a][SPU].append(results[a][AVG][0]/avg)
+            results[a][EFF].append(results[a][SPU][-1]/k)
+  
+    print("Plotting .. " + name)
+    dump_to_console(name, results, benchmark)
   
     if results[a][NTH] == []:
         return  # if there are no values, skip
@@ -130,22 +135,22 @@ def initialize_model():
             for t in threads:
                 model[b][a][t] = []
 
-def dump_to_console():
+def dump_to_console(name, results, benchmark):
     """
     dump model on console for debug reasons
-    """  
+    """
+    for a in affinities:
+        print("    "+a)
+        res = results[a]
+        print("\t"+"#thr"+"\t"+"time"+"\t"+"spdup"+"\t"+"effc"+"\t"+"raw")
+        for i in range(len(res["threads"])):
+            print("\t{0}\t{1:.2f}\t{2:.2f}\t{3:.4f}\t{4}".format(
+                    res["threads"][i],
+                    res["avg"][i],
+                    res["speedup"][i],
+                    res["efficiency"][i],
+                    benchmark[a][res["threads"][i]]))
     print()
-    for b in benchmarks:
-        print(b)
-        for a in affinities:
-            print("    "+a)
-
-            for t in threads:
-                lst = model[b][a][t]
-                
-                if len(lst)>0:
-                    avg = sum(x for x in lst) / len(lst)
-                    print("\t{0}\t{1:.2f}\t{2}".format(t,avg,lst))
 
 if __name__ == '__main__':
     
@@ -162,13 +167,11 @@ if __name__ == '__main__':
     initialize_model()
     
     ### parse results
-    workPath = "../../SPEC_OMP2001/result/"
+    workPath = "../../SPEC_OMP2001/result_backup/"
     for fileName in listdir(workPath):
         if fileName.endswith(".raw"):   # all files ending with .raw
             print(".. Parsing " + fileName)
             parse_single_result(workPath + fileName)
-
-    dump_to_console()
     
     generate_figures()
 
