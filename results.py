@@ -71,39 +71,49 @@ def generate_figures():
         if e.errno != errno.EEXIST:
             raise
     
-    for a in affinities:
-        for b in benchmarks:
-            benchmarkName = b+"."+a
-            print("plot " + benchmarkName)
-            generate_figure(model[b][a], benchmarkName)
+    for b in benchmarks:
+        print("plot " + b)
+        generate_figure(model[b], b)
 
 def generate_figure(benchmark, name):
     
-    numThreads = []
-    runTimes = []
+    numThreads = {}
+    runTimes = {}
     
-    for k in sorted(benchmark.keys()):
-        v = benchmark[k]
-        if len(v)==0:
-            continue
+    for a in affinities:
         
-        avg = sum(x for x in v) / len(v)
-        numThreads.append(k)
-        runTimes.append(avg)
+        numThreadsTmp = []
+        runTimesTmp =  []
+        for k in sorted(benchmark[a].keys()):
+            
+            v = benchmark[a][k]
+            if len(v)==0:
+                continue
+            
+            avg = sum(x for x in v) / len(v)
+            numThreadsTmp.append(k)
+            runTimesTmp.append(avg)
+            
+            runTimes[a] = runTimesTmp
+            numThreads[a] = numThreadsTmp
   
     # some matplotlib magic
     fig, ax = plt.subplots()
     
-    ax.set_title(name + " - Runtime")
-    ax.axis([0.0, max(numThreads)+1, 0.0, max(runTimes)*1.1])
+    ax.set_title(name + " - Runtime")    
+    ax.axis([0.0, max(numThreads["scatter"])+1, 0.0, max(runTimes["scatter"])*1.1])
 
-    ax.plot(numThreads, runTimes, 'black')
+    markers = {"scatter" : "^", "compact" : "o"}
+    colors = {"scatter" : "b", "compact" : "r"}
+
+    for a in affinities:
+        ax.plot(numThreads[a], runTimes[a], color=colors[a], marker=markers[a], label=a)
 
     ax.set_xlabel('numThreads')
     ax.set_ylabel('runtime [s]')
+    plt.legend(loc="right")
     
     plt.savefig('results/'+name+'.png')
-    
     plt.close()
     
 
