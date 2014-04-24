@@ -4,7 +4,8 @@ Created on 16.04.2014
 A script to utilize the results of the spec omp 2001 benchmark
 @author: roman
 '''
-from os import path, listdir
+from os import path, listdir, makedirs
+import errno
 
 #import numpy as np
 import matplotlib.pyplot as plt
@@ -63,11 +64,18 @@ def parse_single_result(fileName):
     #print("threads:" + str(numThreads) + " affinity:" + str(affinity) + " queue:" + str(queue))
 
 def generate_figures():
+    # create results directory if necessary
+    try:
+        makedirs("results")
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    
     for a in affinities:
         for b in benchmarks:
-            figureName = b+"."+a
-            print("plot " + figureName)
-            generate_figure(model[a][b], figureName)
+            benchmarkName = b+"."+a
+            print("plot " + benchmarkName)
+            generate_figure(model[a][b], benchmarkName)
 
 def generate_figure(benchmark, name):
     
@@ -83,10 +91,10 @@ def generate_figure(benchmark, name):
         numThreads.append(k)
         runTimes.append(avg)
   
-    # the actual figure
+    # some matplotlib magic
     fig, ax = plt.subplots()
     
-    ax.set_title(name)
+    ax.set_title(name + " - Runtime")
     ax.axis([0.0, max(numThreads)+1, 0.0, max(runTimes)*1.1])
 
     ax.plot(numThreads, runTimes, 'black')
