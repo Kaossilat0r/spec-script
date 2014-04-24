@@ -59,7 +59,7 @@ def parse_single_result(fileName):
             bench = s.split(".")[3]
             runtime = float(get_last_column_number(line))
 
-            model[affinity][bench][numThreads].append(runtime)
+            model[bench][affinity][numThreads].append(runtime)
     
     #print("threads:" + str(numThreads) + " affinity:" + str(affinity) + " queue:" + str(queue))
 
@@ -75,7 +75,7 @@ def generate_figures():
         for b in benchmarks:
             benchmarkName = b+"."+a
             print("plot " + benchmarkName)
-            generate_figure(model[a][b], benchmarkName)
+            generate_figure(model[b][a], benchmarkName)
 
 def generate_figure(benchmark, name):
     
@@ -108,12 +108,12 @@ def generate_figure(benchmark, name):
     
 
 def initialize_model():
-    for a in affinities:
-        model[a] = {}
-        for b in benchmarks:
-            model[a][b] = {}
+    for b in benchmarks:
+        model[b] = {}
+        for a in affinities:
+            model[b][a] = {}
             for t in threads:
-                model[a][b][t] = []
+                model[b][a][t] = []
 
 def dump_to_console():
     """
@@ -126,7 +126,7 @@ def dump_to_console():
             print("    "+a)
 
             for t in threads:
-                lst = model[a][b][t]
+                lst = model[b][a][t]
                 
                 if len(lst)>0:
                     avg = sum(x for x in lst) / len(lst)
