@@ -83,10 +83,7 @@ def generate_figure(benchmark, name):
     results = {}
     for a in affinities:
         results[a] = {}
-        results[a][NTH] = []
-        results[a][AVG] = []
-        results[a][SPU] = []
-        results[a][EFF] = []
+        results[a][NTH], results[a][AVG], results[a][SPU], results[a][EFF] = [], [], [], []
     
     for a in affinities:
         for k in sorted(benchmark[a].keys()):
@@ -124,6 +121,46 @@ def generate_figure(benchmark, name):
     plt.legend(loc="right")
     
     plt.savefig('results/'+name+'.png')
+    
+    ### speedup magic
+    fig, axSpeedup = plt.subplots()
+    plt.grid()
+    
+    axSpeedup.set_title(name + " - Speedup")    
+    axSpeedup.axis([0.0, max(threads)+1, 0.0, max(threads)])
+
+    markers = {"scatter" : "^", "compact" : "o"}
+    colors = {"scatter" : "b", "compact" : "r"}
+
+    axSpeedup.plot([0,max(threads)], [0,max(threads)], color="black", linestyle="--", label="optimal")
+    for a in affinities:
+        axSpeedup.plot(results[a][NTH], results[a][SPU], color=colors[a], marker=markers[a], label=a)
+
+    axSpeedup.set_xlabel('numThreads')
+    axSpeedup.set_ylabel('speedup')
+    plt.legend(loc="right")
+    
+    plt.savefig('results/speedup.'+name+'.png')
+    
+    ### efficiency magic
+    fig, axEff = plt.subplots()
+    plt.grid()
+    
+    axEff.set_title(name + " - Efficiency")    
+    axEff.axis([0.0, max(threads)+1, 0.0, 1.05])
+
+    markers = {"scatter" : "^", "compact" : "o"}
+    colors = {"scatter" : "b", "compact" : "r"}
+
+    for a in affinities:
+        axEff.plot(results[a][NTH], results[a][EFF], color=colors[a], marker=markers[a], label=a)
+
+    axEff.set_xlabel('numThreads')
+    axEff.set_ylabel('efficiency')
+    plt.legend(loc="right")
+    
+    plt.savefig('results/efficiency.'+name+'.png')
+    
     plt.close()
     
 
