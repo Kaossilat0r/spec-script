@@ -6,6 +6,7 @@ A script to utilize the results of the spec omp 2001 benchmark
 '''
 from os import path, listdir, makedirs
 import errno
+from sys import argv, exit
 
 #import numpy as np
 import matplotlib.pyplot as plt
@@ -43,12 +44,10 @@ def parse_parameters(filePath):
     
     return numThreads, queue, affinity
 
-def parse_single_result(fileName):
+def parse_single_result(filePath):
     """
     parse results from a single file
     """
-    filePath = path.relpath(fileName)
-    
     numThreads, queue, affinity = parse_parameters(filePath)
 
     # parse results
@@ -191,6 +190,13 @@ def dump_to_console(name, results, benchmark):
 
 if __name__ == '__main__':
     
+    workPath = ""
+    if(len(argv)>1):
+        workPath = argv[1]+"/"
+    else:
+        print("Specify path to SPEC_OMP/result as argument")
+        exit()
+    
     affinities = ["scatter", "compact"]
     benchmarks = ["310_wupwise_m", "312_swim_m", "314_mgrid_m", \
                   "316_applu_m", "318_galgel_m", "320_equake_m", \
@@ -204,13 +210,11 @@ if __name__ == '__main__':
     initialize_model()
     
     ### parse results
-    workPath = "../../SPEC_OMP2001/result_backup/"
     for fileName in listdir(workPath):
         if fileName.endswith(".raw"):   # all files ending with .raw
             print(".. Parsing " + fileName)
-            parse_single_result(workPath + fileName)
+            filePath = path.relpath(workPath + fileName)
+            
+            parse_single_result(filePath)
     
     generate_figures()
-
-    # XXX generate a single figure
-    #generate_figure(model["scatter"]["330_art_m"], "330_art_m.scatter")
