@@ -79,15 +79,16 @@ def generate_figures():
         generate_figure(model[b], b)
 
 def generate_figure(benchmark, name):
+    AVG, NTH, SPU = "avg", "threads", "speedup"
     
-    numThreads = {}
-    runtimes = {}
-    speedups = {}
+    results = {}
+    for a in affinities:
+        results[a] = {}
+        results[a][NTH] = []
+        results[a][AVG] = []
+        results[a][SPU] =[]
     
     for a in affinities:
-        
-        numThreadsTmp = []
-        runTimesTmp =  []
         for k in sorted(benchmark[a].keys()):
             
             v = benchmark[a][k]
@@ -95,26 +96,23 @@ def generate_figure(benchmark, name):
                 continue
             
             avg = sum(x for x in v) / len(v)
-            numThreadsTmp.append(k)
-            runTimesTmp.append(avg)
-            
-            runtimes[a] = runTimesTmp
-            numThreads[a] = numThreadsTmp
+            results[a][NTH].append(k)
+            results[a][AVG].append(avg)
   
-    if runtimes == {}:
-        return  # if there were no values, skip
+    if results[a][NTH] == []:
+        return  # if there are no values, skip
   
     # some matplotlib magic
     fig, ax = plt.subplots()
-    
+
     ax.set_title(name + " - Runtime")    
-    ax.axis([0.0, max(numThreads["scatter"])+1, 0.0, max(runtimes["scatter"])*1.1])
+    ax.axis([0.0, max(threads)+1, 0.0, max(results["scatter"][AVG])*1.1])
 
     markers = {"scatter" : "^", "compact" : "o"}
     colors = {"scatter" : "b", "compact" : "r"}
 
     for a in affinities:
-        ax.plot(numThreads[a], runtimes[a], color=colors[a], marker=markers[a], label=a)
+        ax.plot(results[a][NTH], results[a][AVG], color=colors[a], marker=markers[a], label=a)
 
     ax.set_xlabel('numThreads')
     ax.set_ylabel('runtime [s]')
