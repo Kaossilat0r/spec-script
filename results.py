@@ -62,6 +62,13 @@ def parse_single_result(fileName):
     
     #print("threads:" + str(numThreads) + " affinity:" + str(affinity) + " queue:" + str(queue))
 
+def generate_figures():
+    for a in affinities:
+        for b in benchmarks:
+            figureName = b+"."+a
+            print("plot " + figureName)
+            generate_figure(model[a][b], figureName)
+
 def generate_figure(benchmark, name):
     
     numThreads = []
@@ -87,7 +94,10 @@ def generate_figure(benchmark, name):
     ax.set_xlabel('numThreads')
     ax.set_ylabel('runtime [s]')
     
-    plt.savefig('fig.png')
+    plt.savefig('results/'+name+'.png')
+    
+    plt.close()
+    
 
 def initialize_model():
     for a in affinities:
@@ -136,6 +146,8 @@ if __name__ == '__main__':
             parse_single_result(workPath + fileName)
 
     dump_to_console()
+    
+    generate_figures()
 
     # XXX generate a single figure
-    generate_figure(model["scatter"]["330_art_m"], "330_art_m.scatter")
+    #generate_figure(model["scatter"]["330_art_m"], "330_art_m.scatter")
