@@ -20,6 +20,7 @@ If you struggle with matplotlib on win7 x64 as I did too ... this is what finall
 ### Running
 ```python results.py PATH/TO/SPEC/RESULTS/DIRECTORY```
 * Directory should be sth. like ```SPEC_OMP/result/```
+* The script does not have much error handling, so you better provide valid paths..
 
 ###Generates
 * Statistical information to stdout
